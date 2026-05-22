@@ -1,0 +1,843 @@
+
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Futur Proche & Futur Simple — Jeux FLE A2</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600&display=swap');
+  :root{
+    --bg:#EEF2F5;
+    --card:#FAFCFE;
+    --ink:#1E2A35;
+    --ink-soft:#6B7D8A;
+    --line:#D5DDE5;
+    --blue:#3A6EA5;
+    --blue-l:#E6EEF7;
+    --teal:#3A8A7A;
+    --teal-l:#E0F0EC;
+    --violet:#7A5EA5;
+    --violet-l:#EDE8F5;
+    --amber:#C48A2A;
+    --amber-l:#FBF2DC;
+    --ok:#3A8A5A;
+    --ok-l:#DCF0E6;
+    --ko:#A53A3A;
+    --ko-l:#F5E0E0;
+    --radius:14px;
+    --shadow:0 4px 20px rgba(30,42,53,.07);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);
+    font-family:'DM Sans',system-ui,sans-serif;min-height:100vh}
+  /* HERO */
+  .hero{
+    background:linear-gradient(135deg,#1A2D40 0%,#2A4560 100%);
+    color:#EEF2F5;padding:52px 24px 38px;text-align:center;
+    position:relative;overflow:hidden;
+  }
+  .hero::before{
+    content:'';position:absolute;inset:0;
+    background:radial-gradient(ellipse at 20% 50%,rgba(58,110,165,.25) 0%,transparent 55%),
+               radial-gradient(ellipse at 85% 20%,rgba(122,94,165,.2) 0%,transparent 50%);
+  }
+  .hero-badge{
+    display:inline-flex;gap:6px;align-items:center;
+    font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--amber);border:1px solid rgba(196,138,42,.4);
+    padding:5px 14px;border-radius:999px;margin-bottom:18px;position:relative;
+  }
+  .hero h1{
+    font-family:'Playfair Display',Georgia,serif;
+    font-size:clamp(2rem,5vw,3.4rem);font-weight:900;
+    line-height:1.1;position:relative;
+  }
+  .hero h1 .proche{color:#7ABFF0}
+  .hero h1 .simple{color:#B09AE0}
+  .hero h1 .vs{color:rgba(238,242,245,.4);font-size:.65em;vertical-align:middle;margin:0 8px}
+  .hero p{color:rgba(238,242,245,.65);font-size:.98rem;margin-top:10px;position:relative}
+  /* ID FORM */
+  .id-block{
+    max-width:880px;margin:22px auto 0;
+    background:linear-gradient(135deg,#FFF8E8,#FFFCF5);
+    border:1px solid var(--amber);
+    border-radius:var(--radius);padding:18px 22px;
+    box-shadow:var(--shadow);
+  }
+  .id-block .warn{
+    font-size:.92rem;color:#7a4f00;font-weight:600;margin-bottom:10px;
+    font-family:'DM Sans',sans-serif;
+  }
+  .id-fields{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:600px){.id-fields{grid-template-columns:1fr;}}
+  .id-fields label{
+    display:flex;flex-direction:column;
+    font-weight:600;color:var(--ink);font-size:.9rem;
+    font-family:'DM Sans',sans-serif;
+  }
+  .id-fields input{
+    margin-top:6px;padding:9px 12px;
+    border:1px solid var(--line);border-radius:8px;
+    font-size:1rem;background:#fff;
+    font-family:'DM Sans',sans-serif;color:var(--ink);
+  }
+  .id-fields input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-l);}
+  /* COMPARE STRIP */
+  .compare-strip{
+    display:grid;grid-template-columns:1fr auto 1fr;
+    gap:0;background:var(--card);border-bottom:1px solid var(--line);
+    text-align:center;padding:12px 0;
+  }
+  .cs-cell{padding:8px 20px}
+  .cs-cell .label{font-size:.75rem;text-transform:uppercase;letter-spacing:.12em;color:var(--ink-soft);margin-bottom:3px}
+  .cs-cell .val{font-weight:600;font-size:1rem}
+  .proche-col .val{color:var(--blue)}
+  .simple-col .val{color:var(--violet)}
+  .cs-div{display:flex;align-items:center;color:var(--line);font-size:1.5rem}
+  /* NAV */
+  nav.tabs{
+    display:flex;flex-wrap:wrap;justify-content:center;gap:8px;
+    padding:14px;background:var(--card);border-bottom:1px solid var(--line);
+    position:sticky;top:0;z-index:30;
+  }
+  nav.tabs button{
+    background:none;border:1.5px solid var(--line);color:var(--ink-soft);
+    border-radius:999px;padding:7px 18px;font-size:.9rem;cursor:pointer;
+    font-family:'DM Sans',sans-serif;transition:all .2s;font-weight:500;
+  }
+  nav.tabs button.active,nav.tabs button:hover{
+    background:var(--ink);color:#fff;border-color:var(--ink);
+  }
+  nav.tabs button.cta{
+    background:var(--amber-l);color:var(--amber);border-color:var(--amber);font-weight:700;
+  }
+  nav.tabs button.cta:hover{background:var(--amber);color:#fff;}
+  nav.tabs button.cta.active{background:var(--amber);color:#fff;border-color:var(--amber);}
+  /* LAYOUT */
+  main{max-width:880px;margin:0 auto;padding:32px 20px 60px}
+  section.panel{display:none}
+  section.panel.active{display:block}
+  /* SECTION HEADER */
+  .sec-head{display:flex;align-items:center;gap:14px;margin-bottom:24px}
+  .sec-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
+  .sec-head h2{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700}
+  /* THEORY CARDS */
+  .theory-2col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+  @media(max-width:600px){.theory-2col{grid-template-columns:1fr}}
+  .t-card{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:20px;box-shadow:var(--shadow);
+  }
+  .t-card.proche{border-top:4px solid var(--blue)}
+  .t-card.simple{border-top:4px solid var(--violet)}
+  .t-card h3{font-size:1rem;font-weight:700;margin-bottom:10px}
+  .t-card h3 .tag{
+    font-size:.75rem;padding:2px 8px;border-radius:999px;
+    font-weight:500;margin-left:8px;vertical-align:middle;
+  }
+  .proche h3 .tag{background:var(--blue-l);color:var(--blue)}
+  .simple h3 .tag{background:var(--violet-l);color:var(--violet)}
+  .formula{
+    background:var(--bg);border-radius:8px;padding:10px 14px;
+    font-family:monospace;font-size:.9rem;margin:8px 0;color:var(--ink);
+  }
+  .formula strong{color:var(--blue)}
+  .formula.s strong{color:var(--violet)}
+  .ex-list{margin:0;padding:0 0 0 14px;color:var(--ink-soft);font-size:.9rem}
+  .ex-list li{margin-bottom:4px}
+  /* USAGE TABLE */
+  .usage-card{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:20px;box-shadow:var(--shadow);margin-bottom:20px;
+  }
+  .usage-card h3{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--amber);margin-bottom:14px}
+  .usage-table{width:100%;border-collapse:collapse;font-size:.9rem}
+  .usage-table th{padding:9px 12px;text-align:left;font-weight:600}
+  .usage-table th:nth-child(1){background:var(--blue);color:#fff;border-radius:8px 0 0 0}
+  .usage-table th:nth-child(2){background:var(--violet);color:#fff;border-radius:0 8px 0 0}
+  .usage-table td{padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  .usage-table tr:nth-child(even) td{background:var(--bg)}
+  /* ERROR CARD */
+  .error-card{
+    background:var(--card);border:1px solid var(--line);border-left:4px solid var(--ko);
+    border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:20px;
+  }
+  .error-card h3{font-size:1rem;font-weight:700;margin-bottom:12px}
+  .err-row{margin-bottom:10px;font-size:.9rem}
+  /* SCORE BAR */
+  .score-bar{display:flex;align-items:center;gap:12px;margin-bottom:20px;background:var(--bg);border-radius:10px;padding:10px 16px}
+  .score-label{font-size:.85rem;color:var(--ink-soft)}
+  .score-val{font-weight:700;font-size:1.1rem;color:var(--teal)}
+  .progress-wrap{flex:1;height:8px;background:var(--line);border-radius:4px;overflow:hidden}
+  .progress-fill{height:100%;background:var(--teal);border-radius:4px;transition:width .4s}
+  /* GAME CARD */
+  .game-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);margin-bottom:24px}
+  .game-title{font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;margin-bottom:4px}
+  .game-subtitle{color:var(--ink-soft);font-size:.88rem;margin-bottom:18px}
+  /* FILL */
+  .q-block{margin-bottom:18px}
+  .q-text{font-size:1rem;margin-bottom:8px;font-weight:500;line-height:1.6}
+  .hint-tag{font-size:.78rem;background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:2px 7px;color:var(--ink-soft);margin-left:4px;vertical-align:middle}
+  .fill-input{border:2px solid var(--line);border-radius:8px;padding:7px 12px;font-size:.95rem;font-family:'DM Sans',sans-serif;color:var(--ink);background:var(--bg);min-width:140px;outline:none;transition:border-color .2s}
+  .fill-input:focus{border-color:var(--blue)}
+  .fill-input.correct{border-color:var(--ok);background:var(--ok-l)}
+  .fill-input.wrong{border-color:var(--ko);background:var(--ko-l)}
+  /* MCQ */
+  .q-head{font-size:1rem;font-weight:500;margin-bottom:12px;line-height:1.5}
+  .mcq-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  @media(max-width:500px){.mcq-opts{grid-template-columns:1fr}}
+  .mcq-btn{background:var(--bg);border:2px solid var(--line);border-radius:10px;padding:10px 14px;font-size:.95rem;font-family:'DM Sans',sans-serif;cursor:pointer;text-align:left;transition:all .18s;color:var(--ink)}
+  .mcq-btn:hover{border-color:var(--blue);background:var(--blue-l)}
+  .mcq-btn.correct{border-color:var(--ok);background:var(--ok-l);color:var(--ok)}
+  .mcq-btn.wrong{border-color:var(--ko);background:var(--ko-l);color:var(--ko)}
+  .mcq-btn:disabled{cursor:not-allowed}
+  /* CLASSIFY */
+  .classify-q{font-weight:500;margin-bottom:12px;font-size:1rem;font-style:italic;text-align:center;font-size:1.05rem}
+  .classify-btns{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .cl-btn{background:var(--bg);border:2px solid var(--line);border-radius:12px;padding:14px;font-size:.95rem;font-family:'DM Sans',sans-serif;cursor:pointer;text-align:center;transition:all .2s;color:var(--ink);font-weight:500}
+  .cl-btn.proche-btn:hover{border-color:var(--blue);background:var(--blue-l)}
+  .cl-btn.simple-btn:hover{border-color:var(--violet);background:var(--violet-l)}
+  .cl-btn.correct{border-color:var(--ok);background:var(--ok-l)}
+  .cl-btn.wrong{border-color:var(--ko);background:var(--ko-l)}
+  .cl-btn:disabled{cursor:not-allowed}
+  /* REORDER */
+  .words-pool{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;min-height:44px;background:var(--bg);border-radius:10px;padding:10px;border:2px dashed var(--line)}
+  .word-chip{background:var(--card);border:1.5px solid var(--line);border-radius:8px;padding:6px 14px;font-size:.95rem;cursor:pointer;user-select:none;transition:transform .15s,box-shadow .15s}
+  .word-chip:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(30,42,53,.1)}
+  .sentence-drop{min-height:44px;background:#fff;border-radius:10px;padding:8px 12px;border:2px dashed var(--teal);display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:10px}
+  /* FB */
+  .fb{padding:8px 14px;border-radius:8px;font-size:.9rem;margin-top:8px;display:none;align-items:center;gap:8px}
+  .fb.show{display:flex}
+  .fb.ok{background:var(--ok-l);color:var(--ok)}
+  .fb.ko{background:var(--ko-l);color:var(--ko)}
+  /* BUTTONS */
+  .btn-primary{background:var(--ink);color:#fff;border:none;border-radius:999px;padding:11px 26px;font-size:.95rem;font-family:'DM Sans',sans-serif;cursor:pointer;font-weight:500;transition:opacity .2s;margin-top:4px}
+  .btn-primary:hover{opacity:.85}
+  .btn-amber{background:var(--amber);color:#fff;border:none;border-radius:999px;padding:13px 30px;font-size:1rem;font-family:'DM Sans',sans-serif;cursor:pointer;font-weight:600;transition:opacity .2s;margin-top:4px}
+  .btn-amber:hover{opacity:.9}
+  .btn-ghost{background:none;border:1.5px solid var(--line);color:var(--ink-soft);border-radius:999px;padding:10px 22px;font-size:.9rem;font-family:'DM Sans',sans-serif;cursor:pointer;margin-top:4px;transition:all .2s}
+  .btn-ghost:hover{border-color:var(--ink);color:var(--ink)}
+  .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+  /* RESULT */
+  .result-box{background:var(--amber-l);border:2px solid var(--amber);border-radius:var(--radius);padding:20px 24px;text-align:center;margin-top:16px;display:none}
+  .result-box.show{display:block}
+  .result-emoji{font-size:2.5rem}
+  .result-score{font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;color:var(--blue)}
+  .result-msg{color:var(--ink-soft);font-size:.95rem;margin-top:4px}
+  /* LLIURAR */
+  .summary-box{
+    background:linear-gradient(180deg,#FFFCF5,#FFFFFF);
+    border:1px solid var(--amber);border-radius:var(--radius);
+    padding:16px 18px;margin-top:14px;
+  }
+  .summary-box h4{margin-bottom:10px;color:var(--amber);font-family:'Playfair Display',serif;}
+  .summary-box table{width:100%;border-collapse:collapse;font-size:.92rem;}
+  .summary-box td{padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top;}
+  .summary-box td:first-child{font-weight:600;width:55%;}
+  .summary-box td:last-child{text-align:right;color:var(--ink-soft);}
+  .delivery-steps{counter-reset:ds;list-style:none;padding:0;margin:14px 0 0;}
+  .delivery-steps li{
+    counter-increment:ds;padding:9px 8px 9px 44px;position:relative;
+    border-bottom:1px solid var(--line);font-size:.95rem;
+  }
+  .delivery-steps li:before{
+    content:counter(ds);position:absolute;left:8px;top:9px;
+    width:26px;height:26px;border-radius:50%;
+    background:var(--amber);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:700;font-size:.85rem;
+  }
+
+  /* CATALAN NOTES */
+  .cat-note{margin-top:12px;padding:9px 12px;background:#F0FDF4;border-left:3px solid #4ADE80;border-radius:0 6px 6px 0;font-size:.82rem;color:#166534;line-height:1.6}
+  .cat-note strong{color:#14532D}
+  .cat-note::before{content:'🟢 En català: ';font-weight:700;color:#15803D}
+  .toast{
+    position:fixed;left:50%;bottom:30px;
+    transform:translateX(-50%) translateY(80px);
+    background:var(--ink);color:#fff;padding:12px 20px;
+    border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.18);
+    opacity:0;transition:.3s;pointer-events:none;z-index:999;
+    font-family:'DM Sans',sans-serif;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="hero-badge">⭐ A2 · Grammaire</div>
+  <h1>
+    <span class="proche">Futur Proche</span>
+    <span class="vs">VS</span>
+    <span class="simple">Futur Simple</span>
+  </h1>
+  <p>Trois jeux interactifs pour maîtriser les deux futurs en français</p>
+</div>
+
+<!-- ABANS DE COMENÇAR -->
+<div class="id-block" id="identify">
+  <p class="warn">⚠️ Abans de començar: escriu el teu nom i el grup. Apareixeran al PDF que has de pujar a Classroom.</p>
+  <div class="id-fields">
+    <label>Nom i cognoms *<input type="text" id="studentName" placeholder="Ex.: Marta Garcia"></label>
+    <label>Grup / Classe *<input type="text" id="studentGroup" placeholder="Ex.: 3r ESO B"></label>
+  </div>
+</div>
+
+<div class="compare-strip">
+  <div class="cs-cell proche-col">
+    <div class="label">Futur Proche</div>
+    <div class="val">aller + infinitif</div>
+  </div>
+  <div class="cs-div">|</div>
+  <div class="cs-cell simple-col">
+    <div class="label">Futur Simple</div>
+    <div class="val">radical + terminaison</div>
+  </div>
+</div>
+<nav class="tabs">
+  <button class="active" onclick="showPanel('theory',this)">📖 Théorie</button>
+  <button onclick="showPanel('jeu1',this)">✏️ Jeu 1 — Conjuguer</button>
+  <button onclick="showPanel('jeu2',this)">🏷️ Jeu 2 — Classer</button>
+  <button onclick="showPanel('jeu3',this)">🧩 Jeu 3 — Reconstituer</button>
+  <button class="cta" onclick="showPanel('lliurar',this)">📤 Lliurar</button>
+</nav>
+<main>
+<!-- ══ THÉORIE ══ -->
+<section class="panel active" id="theory">
+  <div class="sec-head">
+    <div class="sec-icon" style="background:var(--amber-l);color:var(--amber)">📖</div>
+    <h2>Les deux futurs</h2>
+  </div>
+  <div class="theory-2col">
+    <div class="t-card proche">
+      <h3>Futur Proche <span class="tag">immédiat</span></h3>
+      <p style="font-size:.9rem;color:var(--ink-soft);margin-bottom:10px">Pour une action prévue ou imminente.</p>
+      <div class="formula"><strong>aller</strong> (conjugué) + infinitif</div>
+      <ul class="ex-list">
+        <li>Je <strong>vais manger</strong> ce soir.</li>
+        <li>Nous <strong>allons partir</strong> demain.</li>
+        <li>Elle <strong>va finir</strong> bientôt.</li>
+        <li>Ils <strong>vont arriver</strong> dans 5 minutes.</li>
+      </ul>
+      <div style="margin-top:12px;font-size:.82rem;color:var(--blue);background:var(--blue-l);border-radius:6px;padding:6px 10px">
+        📌 Mots clés : <em>ce soir, demain, bientôt, tout à l'heure, dans 5 min.</em>
+      </div>
+      <div class="cat-note">El <strong>futur pròxim</strong> expressa una acció prevista o imminent. Es forma amb <strong>aller</strong> conjugat + infinitiu. És com dir <em>"anar a fer alguna cosa"</em>: <em>Je vais manger</em> = Vaig a menjar (ara o molt aviat).</div>
+    </div>
+    <div class="t-card simple">
+      <h3>Futur Simple <span class="tag">lointain</span></h3>
+      <p style="font-size:.9rem;color:var(--ink-soft);margin-bottom:10px">Pour une prédiction, une promesse ou un événement futur.</p>
+      <div class="formula s"><strong>radical</strong> + -ai/-as/-a/-ons/-ez/-ont</div>
+      <ul class="ex-list">
+        <li>Je <strong>mangerai</strong> demain soir.</li>
+        <li>Nous <strong>partirons</strong> l'an prochain.</li>
+        <li>Elle <strong>finira</strong> ses études en 2027.</li>
+        <li>Ils <strong>arriveront</strong> en retard.</li>
+      </ul>
+      <div style="margin-top:12px;font-size:.82rem;color:var(--violet);background:var(--violet-l);border-radius:6px;padding:6px 10px">
+        📌 Mots clés : <em>l'an prochain, en 2027, un jour, dans 10 ans, un jour.</em>
+      </div>
+      <div class="cat-note">El <strong>futur simple</strong> expressa prediccions, promeses o fets llunyans. Les terminacions <em>(-ai, -as, -a, -ons, -ez, -ont)</em> s'afegeixen al radical. Compte: verbs com <em>être, avoir, aller, faire</em> tenen radical irregular.</div>
+    </div>
+  </div>
+  <div class="usage-card">
+    <h3>⚖️ Quand utiliser lequel ? <span style="font-size:.8rem;font-weight:400;color:var(--ink-soft)">(Quan s'usa cadascun?)</span></h3>
+    <table class="usage-table">
+      <tr>
+        <th>Futur Proche — aller + inf.</th>
+        <th>Futur Simple — terminaisons</th>
+      </tr>
+      <tr>
+        <td>Action <strong>prévue</strong>, certaine</td>
+        <td><strong>Prédiction</strong>, hypothèse</td>
+      </tr>
+      <tr>
+        <td>Futur <strong>proche</strong> dans le temps</td>
+        <td>Futur <strong>lointain</strong> ou vague</td>
+      </tr>
+      <tr>
+        <td>Intention personnelle</td>
+        <td>Promesse solennelle</td>
+      </tr>
+      <tr>
+        <td><em>Je vais étudier ce soir.</em></td>
+        <td><em>Un jour, j'étudierai médecine.</em></td>
+      </tr>
+    </table>
+    <div class="cat-note"><strong>Resum:</strong> acció propera o planificada → futur pròxim · predicció o fet llunyà → futur simple. Si el context temporal ajuda (<em>ce soir, demain</em> vs. <em>l'an prochain, en 2030</em>), és la pista més fiable.</div>
+  </div>
+  <div class="usage-card">
+    <h3>🔧 Formation du Futur Simple — irréguliers importants</h3>
+    <table class="usage-table" style="font-size:.88rem">
+      <tr><th>Infinitif</th><th>Radical irrégulier</th></tr>
+      <tr><td>être</td><td><strong>ser-</strong> → je serai</td></tr>
+      <tr><td>avoir</td><td><strong>aur-</strong> → j'aurai</td></tr>
+      <tr><td>aller</td><td><strong>ir-</strong> → j'irai</td></tr>
+      <tr><td>faire</td><td><strong>fer-</strong> → je ferai</td></tr>
+      <tr><td>pouvoir</td><td><strong>pourr-</strong> → je pourrai</td></tr>
+      <tr><td>venir</td><td><strong>viendr-</strong> → je viendrai</td></tr>
+    </table>
+  </div>
+  <div class="error-card">
+    <h3>⚠️ Erreurs typiques <span style="font-size:.8rem;font-weight:400;color:var(--ink-soft)">(Errors típics)</span></h3>
+    <div class="err-row">❌ <span style="color:var(--ko)">Je vais mangera</span> → mélange des deux futurs !<br>
+    ✅ <strong>Je vais manger</strong> (proche) ou <strong>Je mangerai</strong> (simple)</div>
+    <div class="err-row">❌ <span style="color:var(--ko)">Elle va venir demain en 2030</span> → contradiction temporelle<br>
+    ✅ <strong>Elle viendra</strong> en 2030 (futur simple pour date lointaine)</div>
+    <div class="err-row">❌ <span style="color:var(--ko)">Nous allerons</span> → "aller" n'a pas de radical en -erons !<br>
+    ✅ <strong>Nous irons</strong></div>
+    <div class="cat-note" style="margin-top:14px"><strong>Per recordar:</strong> futur pròxim = <em>aller</em> + <strong>infinitiu</strong> (mai amb terminació). Futur simple = radical (sovint irregular) + terminació. No s'han de barrejar mai en la mateixa forma verbal.</div>
+  </div>
+</section>
+<!-- ══ JEU 1 — CONJUGUER ══ -->
+<section class="panel" id="jeu1">
+  <div class="sec-head">
+    <div class="sec-icon" style="background:var(--teal-l);color:var(--teal)">✏️</div>
+    <h2>Jeu 1 — Conjugue !</h2>
+  </div>
+  <div class="game-card">
+    <div class="game-title">Complète avec le bon temps</div>
+    <div class="game-subtitle">L'indication entre crochets te dit quel temps utiliser. Attention aux irréguliers !</div>
+    <div class="score-bar">
+      <span class="score-label">Score :</span>
+      <span class="score-val" id="j1-score">0 / 0</span>
+      <div class="progress-wrap"><div class="progress-fill" id="j1-prog" style="width:0%"></div></div>
+    </div>
+    <div id="j1-questions"></div>
+    <div class="actions">
+      <button class="btn-primary" onclick="checkJ1()">Vérifier mes réponses</button>
+      <button class="btn-ghost" onclick="resetJ1()">Recommencer</button>
+    </div>
+    <div class="result-box" id="j1-result">
+      <div class="result-emoji" id="j1-emoji">🎉</div>
+      <div class="result-score" id="j1-scoretext"></div>
+      <div class="result-msg" id="j1-msg"></div>
+    </div>
+  </div>
+</section>
+<!-- ══ JEU 2 — CLASSER ══ -->
+<section class="panel" id="jeu2">
+  <div class="sec-head">
+    <div class="sec-icon" style="background:var(--violet-l);color:var(--violet)">🏷️</div>
+    <h2>Jeu 2 — Futur proche ou simple ?</h2>
+  </div>
+  <div class="game-card">
+    <div class="game-title">Identifie le temps utilisé</div>
+    <div class="game-subtitle">Lis la phrase et clique sur le bon temps. Lis bien les indices temporels !</div>
+    <div class="score-bar">
+      <span class="score-label">Score :</span>
+      <span class="score-val" id="j2-score">0 / 0</span>
+      <div class="progress-wrap"><div class="progress-fill" id="j2-prog" style="width:0%"></div></div>
+    </div>
+    <div id="j2-container"></div>
+    <div class="result-box" id="j2-result">
+      <div class="result-emoji" id="j2-emoji">🎉</div>
+      <div class="result-score" id="j2-scoretext"></div>
+      <div class="result-msg" id="j2-msg"></div>
+    </div>
+  </div>
+</section>
+<!-- ══ JEU 3 — RECONSTITUER ══ -->
+<section class="panel" id="jeu3">
+  <div class="sec-head">
+    <div class="sec-icon" style="background:var(--blue-l);color:var(--blue)">🧩</div>
+    <h2>Jeu 3 — Reconstitue la phrase</h2>
+  </div>
+  <div class="game-card">
+    <div class="game-title">Remet les mots dans l'ordre</div>
+    <div class="game-subtitle">Clique sur les mots pour les placer dans le bon ordre. Clique sur un mot placé pour le retirer.</div>
+    <div class="score-bar">
+      <span class="score-label">Score :</span>
+      <span class="score-val" id="j3-score">0 / 0</span>
+      <div class="progress-wrap"><div class="progress-fill" id="j3-prog" style="width:0%"></div></div>
+    </div>
+    <div id="j3-container"></div>
+    <div class="actions">
+      <button class="btn-primary" onclick="nextJ3()">Vérifier →</button>
+      <button class="btn-ghost" onclick="clearJ3()">Effacer</button>
+    </div>
+    <div class="result-box" id="j3-result">
+      <div class="result-emoji" id="j3-emoji">🎉</div>
+      <div class="result-score" id="j3-scoretext"></div>
+      <div class="result-msg" id="j3-msg"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ LLIURAR ══ -->
+<section class="panel" id="lliurar">
+  <div class="sec-head">
+    <div class="sec-icon" style="background:var(--amber-l);color:var(--amber)">📤</div>
+    <h2>Finalitzar i lliurar a Classroom</h2>
+  </div>
+  <div class="game-card">
+    <div class="game-title">El teu PDF de lliurament</div>
+    <div class="game-subtitle">Quan acabis els 3 jocs, comprova el resum, descarrega el PDF i puja'l a Google Classroom.</div>
+
+    <div class="summary-box">
+      <h4>Resum del teu treball</h4>
+      <table id="summaryTable"></table>
+    </div>
+
+    <div class="actions">
+      <button class="btn-ghost" id="refreshSummary">↻ Actualitzar resum</button>
+      <button class="btn-amber" id="dlPdf">📄 Descarregar el meu PDF</button>
+    </div>
+  </div>
+  <div class="usage-card" style="border-left:4px solid var(--amber)">
+    <h3>Com lliurar-ho a Google Classroom</h3>
+    <ol class="delivery-steps">
+      <li>Fes clic a <em>📄 Descarregar el meu PDF</em>. Es desarà al teu dispositiu (carpeta <em>Descàrregues</em>).</li>
+      <li>Obre Google Classroom i ves a la tasca «Futur Proche vs Futur Simple».</li>
+      <li>Fes clic a <em>Afegeix o crea → Fitxer</em> i tria el PDF descarregat.</li>
+      <li>Fes clic a <em>Lliura</em>. Llest! 🎉</li>
+    </ol>
+  </div>
+</section>
+
+</main>
+
+<div class="toast" id="toast">PDF generat ✅</div>
+
+<script>
+// tracker
+window.__results = { j1:null, j2:null, j3:null };
+
+// NAV
+function showPanel(id, btn) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(id==='lliurar') buildSummary();
+}
+// ─── JEU 1 — FILL ──────────────────────────────────
+const j1Data = [
+  {before:"Ce soir, nous ", hint:"[futur proche : manger]", form:"allons manger", after:" à la maison."},
+  {before:"Je ", hint:"[futur proche : partir]", form:"vais partir", after:" dans dix minutes."},
+  {before:"Elle ", hint:"[futur proche : finir]", form:"va finir", after:" ses devoirs bientôt."},
+  {before:"Vous ", hint:"[futur proche : voir]", form:"allez voir", after:" un film ce soir ?"},
+  {before:"Ils ", hint:"[futur proche : arriver]", form:"vont arriver", after:" tout à l'heure."},
+  {before:"En 2030, les robots ", hint:"[futur simple : faire]", form:"feront", after:" beaucoup de travaux."},
+  {before:"Un jour, je ", hint:"[futur simple : être]", form:"serai", after:" médecin."},
+  {before:"L'an prochain, nous ", hint:"[futur simple : aller]", form:"irons", after:" en France."},
+  {before:"Vous ", hint:"[futur simple : avoir]", form:"aurez", after:" une belle vie ensemble."},
+  {before:"Dans dix ans, elle ", hint:"[futur simple : parler]", form:"parlera", after:" cinq langues."},
+  {before:"Demain matin, tu ", hint:"[futur proche : prendre]", form:"vas prendre", after:" le bus à 7h."},
+  {before:"Ils ", hint:"[futur simple : venir]", form:"viendront", after:" à la fête la semaine prochaine."},
+];
+function buildJ1() {
+  const c = document.getElementById('j1-questions');
+  c.innerHTML='';
+  j1Data.forEach((q,i)=>{
+    c.innerHTML+=`
+      <div class="q-block">
+        <div class="q-text">${q.before}<input class="fill-input" id="j1-${i}" placeholder="…"> ${q.after}
+          <span class="hint-tag">${q.hint}</span>
+        </div>
+        <div class="fb" id="j1-fb-${i}"></div>
+      </div>`;
+  });
+  document.querySelectorAll('#j1-questions .fill-input').forEach(inp=>{
+    inp.addEventListener('paste',e=>{e.preventDefault();toast('⌨️ Cal teclejar les respostes. No es permet enganxar text.');});
+  });
+  document.getElementById('j1-result').classList.remove('show');
+  updateScore('j1',0,0);
+}
+function checkJ1(){
+  let ok=0;
+  j1Data.forEach((q,i)=>{
+    const inp=document.getElementById(`j1-${i}`);
+    const fb=document.getElementById(`j1-fb-${i}`);
+    const val=inp.value.trim().toLowerCase();
+    inp.classList.remove('correct','wrong'); fb.classList.remove('show','ok','ko');
+    if(val===q.form){ok++;inp.classList.add('correct');fb.className='fb show ok';fb.textContent='✓ Correct !'}
+    else{inp.classList.add('wrong');fb.className='fb show ko';fb.textContent=`✗ Bonne réponse : ${q.form}`}
+  });
+  updateScore('j1',ok,j1Data.length);
+  showResult('j1',ok,j1Data.length);
+  window.__results.j1 = { score: ok, total: j1Data.length };
+}
+function resetJ1(){buildJ1(); window.__results.j1 = null;}
+// ─── JEU 2 — CLASSIFY ──────────────────────────────
+const j2Data = [
+  {phrase:"Nous allons voyager en Espagne cet été.", ans:"proche", expl:"allons + voyager → futur proche"},
+  {phrase:"Dans cent ans, les hommes vivront sur Mars.", ans:"simple", expl:"vivront → futur simple (lointain)"},
+  {phrase:"Je vais appeler ma mère ce soir.", ans:"proche", expl:"vais + appeler → futur proche"},
+  {phrase:"Tu seras très heureux un jour.", ans:"simple", expl:"seras → futur simple (irrégulier : être)"},
+  {phrase:"Elle va finir le projet avant midi.", ans:"proche", expl:"va + finir → futur proche"},
+  {phrase:"En 2040, il y aura des voitures volantes.", ans:"simple", expl:"il y aura → futur simple (avoir)"},
+  {phrase:"Vous allez voir quelque chose d'incroyable !", ans:"proche", expl:"allez + voir → futur proche"},
+  {phrase:"Ils partiront en vacances l'an prochain.", ans:"simple", expl:"partiront → futur simple (partir)"},
+  {phrase:"On va manger une pizza ce soir.", ans:"proche", expl:"va + manger → futur proche"},
+  {phrase:"Je ferai le tour du monde dans dix ans.", ans:"simple", expl:"ferai → futur simple (faire, irrégulier)"},
+  {phrase:"Tu vas réussir ton examen demain !", ans:"proche", expl:"vas + réussir → futur proche"},
+  {phrase:"Nous aurons un nouveau président dans deux ans.", ans:"simple", expl:"aurons → futur simple (avoir, irrégulier)"},
+];
+let j2Idx=0, j2Ok=0;
+function buildJ2(){
+  if(j2Idx>=j2Data.length){endJ2();return;}
+  const q=j2Data[j2Idx];
+  document.getElementById('j2-container').innerHTML=`
+    <div class="classify-q">"${q.phrase}"</div>
+    <div style="color:var(--ink-soft);font-size:.83rem;text-align:center;margin-bottom:14px">
+      Question ${j2Idx+1} / ${j2Data.length}
+    </div>
+    <div class="classify-btns">
+      <button class="cl-btn proche-btn" onclick="answerJ2('proche')">🔵 Futur Proche<br><small style="font-weight:400;font-size:.78rem">aller + infinitif</small></button>
+      <button class="cl-btn simple-btn" onclick="answerJ2('simple')">🟣 Futur Simple<br><small style="font-weight:400;font-size:.78rem">radical + terminaison</small></button>
+    </div>
+    <div class="fb" id="j2-fb"></div>`;
+}
+function answerJ2(chosen){
+  const q=j2Data[j2Idx];
+  document.querySelectorAll('.cl-btn').forEach(b=>b.disabled=true);
+  const fb=document.getElementById('j2-fb');
+  if(chosen===q.ans){
+    j2Ok++;
+    document.querySelector(`.${chosen}-btn`).classList.add('correct');
+    fb.className='fb show ok'; fb.textContent=`✓ Correct ! ${q.expl}`;
+  } else {
+    document.querySelector(`.${chosen}-btn`).classList.add('wrong');
+    document.querySelector(`.${q.ans}-btn`).classList.add('correct');
+    fb.className='fb show ko'; fb.textContent=`✗ C'était : ${q.ans==='proche'?'Futur Proche':'Futur Simple'}. ${q.expl}`;
+  }
+  updateScore('j2',j2Ok,j2Data.length);
+  setTimeout(()=>{j2Idx++;buildJ2();},1800);
+}
+function endJ2(){
+  document.getElementById('j2-container').innerHTML='';
+  showResult('j2',j2Ok,j2Data.length);
+  window.__results.j2 = { score: j2Ok, total: j2Data.length };
+}
+function resetJ2(){j2Idx=0;j2Ok=0;buildJ2();document.getElementById('j2-result').classList.remove('show');updateScore('j2',0,0); window.__results.j2 = null;}
+// ─── JEU 3 — REORDER ───────────────────────────────
+const j3Data = [
+  {words:["vais","Je","à","Paris","aller","demain"], answer:"Je vais aller à Paris demain"},
+  {words:["un","sera","médecin","jour","Il"], answer:"Il sera médecin un jour"},
+  {words:["allons","Nous","voir","film","un","ce","soir"], answer:"Nous allons voir un film ce soir"},
+  {words:["feront","Ils","des","en","voyages","2035"], answer:"Ils feront des voyages en 2035"},
+  {words:["vas","bientôt","Tu","finir","tes","devoirs"], answer:"Tu vas finir tes devoirs bientôt"},
+  {words:["parlera","L'an","prochain","elle","espagnol"], answer:"L'an prochain elle parlera espagnol"},
+  {words:["allons","Nous","partir","en","vacances","demain"], answer:"Nous allons partir en vacances demain"},
+  {words:["irons","à","Nous","la","montagne","prochain","l'été"], answer:"Nous irons à la montagne l'été prochain"},
+  {words:["va","Elle","appeler","sa","mère","ce","soir"], answer:"Elle va appeler sa mère ce soir"},
+  {words:["seront","dans","Ils","mariés","deux","ans"], answer:"Ils seront mariés dans deux ans"},
+];
+let j3Idx=0, j3Ok=0, j3Pool=[], j3Chosen=[];
+function buildJ3(){
+  if(j3Idx>=j3Data.length){endJ3();return;}
+  const q=j3Data[j3Idx];
+  j3Pool=shuffle([...q.words]); j3Chosen=[];
+  renderJ3();
+}
+function renderJ3(){
+  const c=document.getElementById('j3-container');
+  c.innerHTML=`
+    <div class="q-text" style="margin-bottom:12px">Phrase ${j3Idx+1} / ${j3Data.length}</div>
+    <div class="words-pool" id="j3-pool">
+      ${j3Pool.map((w,i)=>`<div class="word-chip" onclick="j3Add(${i})" id="j3-w-${i}">${w}</div>`).join('')}
+    </div>
+    <div class="sentence-drop" id="j3-drop">
+      <span style="color:var(--ink-soft);font-size:.85rem;font-style:italic">Clique les mots ici…</span>
+    </div>
+    <div class="fb" id="j3-fb"></div>`;
+}
+function j3Add(idx){
+  const chip=document.getElementById(`j3-w-${idx}`);
+  if(chip.style.visibility==='hidden')return;
+  chip.style.visibility='hidden';
+  j3Chosen.push({idx,word:j3Pool[idx]});
+  renderJ3Drop();
+}
+function renderJ3Drop(){
+  const drop=document.getElementById('j3-drop');
+  if(j3Chosen.length){
+    drop.innerHTML=j3Chosen.map((c,i)=>
+      `<div class="word-chip" style="background:var(--teal-l);border-color:var(--teal)" onclick="j3Remove(${i})">${c.word}</div>`
+    ).join('');
+  } else {
+    drop.innerHTML='<span style="color:var(--ink-soft);font-size:.85rem;font-style:italic">Clique les mots ici…</span>';
+  }
+}
+function j3Remove(i){
+  const removed=j3Chosen.splice(i,1)[0];
+  const chip=document.getElementById(`j3-w-${removed.idx}`);
+  if(chip)chip.style.visibility='visible';
+  renderJ3Drop();
+}
+function clearJ3(){j3Chosen=[];j3Pool=shuffle([...j3Data[j3Idx].words]);buildJ3();}
+function nextJ3(){
+  const fb=document.getElementById('j3-fb');
+  if(!j3Chosen.length){fb.className='fb show ko';fb.textContent='⚠️ Ajoute des mots !';return;}
+  const built=j3Chosen.map(c=>c.word).join(' ');
+  const answer=j3Data[j3Idx].answer;
+  if(built===answer){j3Ok++;fb.className='fb show ok';fb.textContent='✓ Parfait !'}
+  else{fb.className='fb show ko';fb.textContent=`✗ Bonne réponse : ${answer}`}
+  updateScore('j3',j3Ok,j3Data.length);
+  setTimeout(()=>{j3Idx++;buildJ3();},1500);
+}
+function endJ3(){
+  document.getElementById('j3-container').innerHTML='';
+  showResult('j3',j3Ok,j3Data.length);
+  window.__results.j3 = { score: j3Ok, total: j3Data.length };
+}
+function resetJ3(){j3Idx=0;j3Ok=0;buildJ3();document.getElementById('j3-result').classList.remove('show');updateScore('j3',0,0); window.__results.j3 = null;}
+// ─── SHARED ────────────────────────────────────────
+function updateScore(prefix,ok,total){
+  document.getElementById(`${prefix}-score`).textContent=`${ok} / ${total}`;
+  document.getElementById(`${prefix}-prog`).style.width=total?`${ok/total*100}%`:'0%';
+}
+function showResult(prefix,ok,total){
+  const pct=total?ok/total:0;
+  const box=document.getElementById(`${prefix}-result`);
+  document.getElementById(`${prefix}-emoji`).textContent=pct>=.8?'🏆':pct>=.5?'👍':'💪';
+  document.getElementById(`${prefix}-scoretext`).textContent=`${ok} / ${total}`;
+  const msgs={
+    high:['Excellent ! Tu maîtrises les deux futurs !','Superbe travail !','Très bien, continue !'],
+    mid:['Pas mal ! Relis la théorie et réessaie.','Tu progresses !','Encore un effort !'],
+    low:['Revois la théorie et entraîne-toi encore !','Ne lâche pas !','Pratique davantage !'],
+  };
+  const cat=pct>=.8?'high':pct>=.5?'mid':'low';
+  document.getElementById(`${prefix}-msg`).textContent=msgs[cat][Math.floor(Math.random()*3)];
+  box.classList.add('show');
+}
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}
+  return arr;
+}
+// ─── SUMMARY + PDF ─────────────────────────────────
+function buildSummary(){
+  const name = (document.getElementById('studentName').value||'').trim() || '—';
+  const grp  = (document.getElementById('studentGroup').value||'').trim() || '—';
+  const R = window.__results || {};
+  const rows = [
+    ['Nom i cognoms', escapeHtml(name)],
+    ['Grup / Classe', escapeHtml(grp)],
+    ['Data', new Date().toLocaleDateString('ca-ES')],
+    ['Jeu 1 · Conjuguer', R.j1 ? `${R.j1.score} / ${R.j1.total}` : 'pendent'],
+    ['Jeu 2 · Classer', R.j2 ? `${R.j2.score} / ${R.j2.total}` : 'pendent'],
+    ['Jeu 3 · Reconstituer', R.j3 ? `${R.j3.score} / ${R.j3.total}` : 'pendent'],
+  ];
+  document.getElementById('summaryTable').innerHTML =
+    rows.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('');
+  return { name, grp, rows };
+}
+function escapeHtml(s){
+  return (s+'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._tid);
+  t._tid=setTimeout(()=>t.classList.remove('show'),2400);
+}
+document.getElementById('refreshSummary').onclick=()=>{buildSummary();toast('Resum actualitzat ✅');};
+['studentName','studentGroup'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',buildSummary);
+});
+
+document.getElementById('dlPdf').onclick = ()=>{
+  const s = buildSummary();
+  if(s.name==='—' || s.grp==='—'){
+    alert('Cal omplir el Nom i el Grup abans de descarregar el PDF.');
+    document.getElementById('studentName').focus();
+    document.getElementById('identify').scrollIntoView({behavior:'smooth'});
+    return;
+  }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({unit:'mm', format:'a4'});
+  const W = doc.internal.pageSize.getWidth();
+  const H = doc.internal.pageSize.getHeight();
+  let y = 0;
+
+  // header
+  doc.setFillColor(26,45,64); doc.rect(0,0,W,32,'F');
+  doc.setTextColor(238,242,245); doc.setFont('helvetica','bold'); doc.setFontSize(16);
+  doc.text("Futur Proche vs Futur Simple", 14, 14);
+  doc.setFont('helvetica','italic'); doc.setFontSize(10);
+  doc.setTextColor(196,138,42);
+  doc.text("Tasca per a Google Classroom · FLE A2", 14, 21);
+  doc.setFont('helvetica','normal'); doc.setFontSize(9);
+  doc.setTextColor(180);
+  doc.text("https://futurprochevsfutursimple.netlify.app/", 14, 27);
+
+  y = 42;
+  doc.setTextColor(30,42,53); doc.setFont('helvetica','bold'); doc.setFontSize(11);
+  doc.text(`Nom: ${s.name}`, 14, y);
+  doc.text(`Grup: ${s.grp}`, W/2, y);
+  y += 6;
+  doc.text(`Data: ${new Date().toLocaleDateString('ca-ES')}`, 14, y);
+  y += 9;
+  doc.setDrawColor(196,138,42); doc.setLineWidth(.4); doc.line(14, y, W-14, y); y += 7;
+
+  // resum
+  doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(58,110,165);
+  doc.text("Resum del treball", 14, y); y += 7;
+  doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(0);
+  s.rows.slice(3).forEach(r => {
+    if(y>275){ doc.addPage(); y=20; }
+    doc.setFont('helvetica','bold'); doc.text("• "+r[0], 14, y);
+    doc.setFont('helvetica','normal'); doc.text((r[1]+'').replace(/&[^;]+;/g,'&'), W-14, y, {align:'right'});
+    y += 6;
+  });
+
+  y += 6;
+  doc.setDrawColor(196,138,42); doc.line(14, y, W-14, y); y += 7;
+
+  // JEU 1 — detall
+  doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(58,138,122);
+  doc.text("Jeu 1 · Conjuguer (respostes)", 14, y); y += 6;
+  doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(0);
+  j1Data.forEach((q,i)=>{
+    const userInp = document.getElementById('j1-'+i);
+    const userVal = userInp ? (userInp.value || '(sense resposta)') : '(sense resposta)';
+    const ok = userVal.trim().toLowerCase() === q.form;
+    if(y>270){doc.addPage();y=20;}
+    const sentence = `${q.before}_____${q.after} ${q.hint}`;
+    const lines = doc.splitTextToSize(`${i+1}. ${sentence}`, W-28);
+    doc.setFont('helvetica','bold'); doc.text(lines, 14, y); y += lines.length*4.5;
+    doc.setFont('helvetica','normal');
+    doc.text(`   Tu: ${userVal}  ${ok?'OK':'X'}`, 14, y); y += 5;
+    if(!ok){ doc.text(`   Correcta: ${q.form}`, 14, y); y += 5; }
+    y += 1;
+  });
+
+  // JEU 2 — solucionari
+  if(y>250){ doc.addPage(); y=20; }
+  y += 4;
+  doc.setDrawColor(196,138,42); doc.line(14, y, W-14, y); y += 7;
+  doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(122,94,165);
+  doc.text("Jeu 2 · Classer (solucionari)", 14, y); y += 6;
+  doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(0);
+  j2Data.forEach((q,i)=>{
+    if(y>270){doc.addPage();y=20;}
+    const lines = doc.splitTextToSize(`${i+1}. "${q.phrase}"`, W-28);
+    doc.setFont('helvetica','bold'); doc.text(lines, 14, y); y += lines.length*4.5;
+    doc.setFont('helvetica','normal');
+    doc.text(`   Resposta: ${q.ans==='proche'?'Futur Proche':'Futur Simple'} — ${q.expl}`, 14, y); y += 5.5;
+  });
+
+  // footer
+  const pages = doc.internal.getNumberOfPages();
+  for(let p=1;p<=pages;p++){
+    doc.setPage(p);
+    doc.setFont('helvetica','italic'); doc.setFontSize(8); doc.setTextColor(110);
+    doc.text(`${s.name} · ${s.grp} · Pàgina ${p}/${pages}`, W/2, H-8, {align:'center'});
+  }
+
+  const fname = `Futur-Proche-vs-Simple_${s.name.replace(/\s+/g,'_')}_${s.grp.replace(/\s+/g,'_')}.pdf`;
+  doc.save(fname);
+  toast('PDF generat ✅');
+};
+
+// INIT
+buildJ1(); buildJ2(); buildJ3();
+buildSummary();
+</script>
+</body>
+</html>
